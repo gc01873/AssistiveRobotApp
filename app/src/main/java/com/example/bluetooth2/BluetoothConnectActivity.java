@@ -1,6 +1,7 @@
 package com.example.bluetooth2;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -10,6 +11,7 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,41 +25,88 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.location.LocationRequest;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.UUID;
+
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class BluetoothConnectActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     //Declare the bluetooth adapter for the device
 BluetoothAdapter mBluetoothAdapter;
 //Widgets for device
-Button scan;
+//Button scan;
 Button send;
 Button followMe;
-TextView showDevices;
 ListView lv;
 EditText write;
-Switch onOff;
 TextView MsgTerminal;
 public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
 public ArrayList<String> mBTDevicesNames = new ArrayList<>();
+private ArrayAdapter<String> listAdapter;
+Boolean Connected=false;
 private GPSService GPS;
 public Boolean followMode = false;
-
-//this device will become the raspberry pi I believe
+//this device will become the raspberry pi
 BluetoothDevice mBTDevice;
-
 //ID is the same as the PI
 private static final UUID MY_UUID_INSECURE = UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee");
+ProgressDialog dialog;
+
 //For logging errors
 private static final String TAG = "BluetoothActivity";
 public BluetoothConnectionService mBluetoothConnection;
 
+/*THESE FRAGMENTS MAY BECOME NULL SO THEIR STATES MUST BE SAVED!
+
+
+Things to be saved:
+1.The listview
+2.The bluetooth connection made
+3.The states of the fragments
+
+
+
+ */
+
+
+    //Fragments that will be used by program
+    private FollowMeFragment followMeFragment;
+
+
+    private MapFragment mapFragment;
+    private BluetoothScanFragment bluetoothScanFragment;
+
+    private ControlMeFragment controlMeFragment;
+    //Needs to make one more fragment the controlMe Fragment
+
+
+FragmentManager  fragmentManager = getSupportFragmentManager();
+
+    //This will be used to communicate with the bluetooth scan fragment
+    private ItemViewModel viewModel;
+
+public BluetoothConnectActivity(){
+    super(R.layout.activity_connectblu);
+}
+
+
 
 //Declare Broadcast receiver 1 used for discovering new devices
+
+
 
 
     // Create a BroadcastReceiver for ACTION_FOUND.
@@ -81,8 +130,9 @@ public BluetoothConnectionService mBluetoothConnection;
                 mBTDevicesNames.add(device.getName() + "\n" + device.getAddress());
                 Log.i("BT", device.getName() + "\n" + device.getAddress());
                 //Change to list view?
-                lv.setAdapter(new ArrayAdapter<String>(context,
-                        android.R.layout.simple_list_item_1, mBTDevicesNames));
+                listAdapter=new ArrayAdapter<String>(context,
+                        android.R.layout.simple_list_item_1, mBTDevicesNames);
+                lv.setAdapter(listAdapter);
                 //lv.notifyDataSetChanged();
 
             }
@@ -138,141 +188,46 @@ public BluetoothConnectionService mBluetoothConnection;
 //Bluetooth adapter for the device
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-
-        //Widgets declarations
-        scan = (Button) findViewById(R.id.scan);
-        send  = (Button) findViewById(R.id.send);
-        showDevices = (EditText) findViewById(R.id.showDevices);
-
-        write = (EditText) findViewById(R.id.write);
-
-        onOff = (Switch) findViewById(R.id.ONOFFbtn);
-
-        MsgTerminal = (TextView) findViewById(R.id.MsgTerminal);
-
-        lv = (ListView) findViewById(R.id.lv);
-        followMe = (Button)findViewById((R.id.followMe));
-
-        MsgTerminal.setVisibility(View.GONE);
-        write.setVisibility(View.GONE);
-        send.setVisibility(View.GONE);
-        followMe.setVisibility(View.GONE);
-
-
-        //Hmm on this page this creates an on click listener
-        lv.setOnItemClickListener(BluetoothConnectActivity.this);
-        //Create the gps object
         GPS = new GPSService(this);
-
-
-
-
-
-
-
-        //Make the Widgets do something
-
-        scan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "Now Attempting to scan for Bluetooth devices (Raspberry Pi)");
-                if(mBluetoothAdapter.isDiscovering()){
-                    mBluetoothAdapter.cancelDiscovery();
-                }
-
-                checkBTPermissions();
-
-                Intent getVisible = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-                startActivityForResult(getVisible, 0);
-
-
-                //May be redundant, We will see
-                mBluetoothAdapter.startDiscovery();
-
-
-//Broadcast receiver initiated
-                IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-                registerReceiver(receiver, filter);
-
-                //This can be another button but it will be in scan for now.
-
-                //Add another broadcastreceiver to show state changes
-                int requestCode = 1;
-                Intent discoverableIntent =
-                        new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-                //discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-                startActivityForResult(discoverableIntent, requestCode);
-
-
-
-
-            }
-        });
-send.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-        if(mBluetoothConnection!=null) {
-            if (write.getText().toString() != null) {
-               // String SendData = w;
-                try {
-                    byte[] bytes = write.getText().toString().getBytes("UTF-8");
-                    mBluetoothConnection.write(bytes);
-                    MsgTerminal.append("Android: "+write.getText().toString() +"\n");
-                } catch (UnsupportedEncodingException e) {
-                    Log.e(TAG,"Write method error: "+e.getMessage() );
-                    e.printStackTrace();
-                }
-                //convert editText to byte code
-                //use Bluetoothconnection to write i.e send to raspberry pi
-                //print text to msg terminal
-            }
-        }
-    }
-
-    });
-
-        onOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-    if(mBluetoothAdapter==null){
-    Log.d(TAG,"No Bluetooth Device detected on this system");
-    Toast.makeText(getApplicationContext(), "Turned on",Toast.LENGTH_LONG).show();
-} else if(!isChecked){
-           // if (!mBluetoothAdapter.isEnabled()) {
-            Log.d(TAG, "Turning on Bluetooth Service");
-//May need to move this outside
-            Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(turnOn, 0);
-
-            // IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            // registerReceiver(mBroadcastReceiver1, BTIntent);
-            Toast.makeText(getApplicationContext(), "Turned on", Toast.LENGTH_LONG).show();
-
-      //  }
-
-
-                }
-
-
-                else
-                {
-                    Log.d(TAG, "Turning off Bluetooth Service");
-                    mBluetoothAdapter.disable();
-
-                    Toast.makeText(getApplicationContext(), "Bluetooth Turned off",Toast.LENGTH_LONG).show();
-
-                   // IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-                    //registerReceiver(mBroadcastReceiver1, BTIntent);
-                }
-            }
-        });
-
+        dialog = new ProgressDialog(this);
 //
 
+        try {
+            if(savedInstanceState==null) {
+                 bluetoothScanFragment = new BluetoothScanFragment();
+                fragmentManager.beginTransaction()
+                        .setReorderingAllowed(true)
+                        //.add(R.id.fragment_container_view,BluetoothScanFragment.class,null)
+                        .add(R.id.fragment_container_view,bluetoothScanFragment,null)
+                        .addToBackStack(null)// name can be null
+                        .commit();
+                Log.d(TAG, "Fragment first display");
+            }
+            else if(savedInstanceState!=null){
+              //  onRestoreInstanceState(savedInstanceState);
+
+            }
+        }
+        catch(Exception e){
+            Log.e(TAG,"Error initializing Fragment!");
+        }
+
+        viewModel = new ViewModelProvider(this).get(ItemViewModel.class);
+        viewModel.getSelectedItem().observe(this, item -> {
+            // Perform an action with the latest item data
+            lv = (ListView) item;
 
 
+          //  Parcelable state = lv.onSaveInstanceState();
+           // lv.onRestoreInstanceState(state);
+
+        });
+
+
+
+
+
+/*
         followMe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -282,7 +237,7 @@ GPS_t.start();
             }
 
         });
-
+*/
         //May need to change this but we will see
         // Register for broadcasts when a device is discovered.
         //IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -295,7 +250,7 @@ GPS_t.start();
 
       /* NOTE: This will only execute on versions > LOLLIPOP because it is not needed otherwise.
      */
-    private void checkBTPermissions() {
+     void checkBTPermissions() {
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
             int permissionCheck = 0;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -307,7 +262,7 @@ GPS_t.start();
             if (permissionCheck != 0) {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
+                    this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.BLUETOOTH_CONNECT}, 1001); //Any number
                 }
             }
         }else{
@@ -316,7 +271,7 @@ GPS_t.start();
     }
 
 
-    //OKAYY METHOD WHEN WE CLICK ON A DEVICE
+
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         //first cancel discovery because its very memory intensive.
@@ -335,7 +290,7 @@ GPS_t.start();
 
         //create the bond.
         //NOTE: Requires API 17+? I think this is JellyBean
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
             Log.d(TAG, "Trying to pair with " + deviceName);
             mBTDevices.get(i).createBond();
 
@@ -343,60 +298,129 @@ GPS_t.start();
             //We'll get there
 
 
-
-
-
-
 //This should activate the intent filter
-                IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+            IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
 
-                registerReceiver(receiver1, filter);
+            registerReceiver(receiver1, filter);
 
-                //SO WE MUST FIRST PAIR THE RASPBERRY PI WITH THE PI
+            //SO WE MUST FIRST PAIR THE RASPBERRY PI WITH THE PI
 //This should also change the list view to the edit text window which shows the texts from the raspberry pi and the other
             try {
-                Log.e(TAG,"Attemping to sleep so that the raspbPi accept thread is started first");
+                Log.e(TAG, "Attemping to sleep so that the raspbPi accept thread is started first");
                 Thread.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            //Write for if the device is the raspberry pi
-            mBluetoothConnection = new BluetoothConnectionService(BluetoothConnectActivity.this,mBluetoothAdapter,mBTDevice,lv,write,MsgTerminal,send);
-            mBluetoothConnection.startClient(mBTDevice,MY_UUID_INSECURE);
+            Connected = startBluetooth();
+            Log.d(TAG, "possible error in onclick method");
+            //and name of device is rasp
+            if (Connected) {
+                //code to change the activity fragment.
 
-            lv.setVisibility(View.GONE);
-            MsgTerminal.setVisibility(View.VISIBLE);
-            write.setVisibility(View.VISIBLE);
-            send.setVisibility(View.VISIBLE);
-            followMe.setVisibility(View.VISIBLE);
-            scan.setVisibility(View.GONE);
-            onOff.setVisibility(View.GONE);
-
-///In this we have passed in also the bluetooth adapter and the Bluetooth Device
-
+                fragmentManager.beginTransaction()
+                        .setReorderingAllowed(true)
+                        .replace(R.id.fragment_container_view, FollowMeFragment.class, null)
+                        .addToBackStack(null)// name can be null
+                        .commit();
+            }
+            else
+            {
+                Log.d(TAG,"Unsupported Bluetooth Device!");
+                dialog.setMessage("Try selecting another supoorted device.");
+                dialog.show();
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                dialog.dismiss();
             }
 
         }
+    }
 
 
 
+        public Boolean startBluetooth(){
+         try {
+             Log.d(TAG,"initialiting start Bluetooth");
+             mBluetoothConnection = new BluetoothConnectionService(BluetoothConnectActivity.this, mBluetoothAdapter, mBTDevice, write);
+             mBluetoothConnection.startClient(mBTDevice, MY_UUID_INSECURE);
+             byte[] buffer = new byte[1024];  // buffer store for the stream
+
+             int bytes;
+             String uuidtest = "94f39d29-7d6d-437d-973b-fba39e49d4ee";
+             Thread.sleep(2000);
+             String pimsg = mBluetoothConnection.getMessage();
+             Log.d(TAG,"Received uuid string from Pi");
+             Log.d(TAG,pimsg);
+
+
+             while(true) {
+                 if (uuidtest.equals(pimsg)) {
+                     mBluetoothConnection.write("True".getBytes("UTF-8"));
+                     Log.d(TAG,"Correct Device!");
+
+                     return true;
+                 } else {
+                     mBluetoothConnection.write("False".getBytes("UTF-8"));
+                     Log.d(TAG,"Incorrect Uuid!");
+                     return false;
+                 }
+             }
+
+         }catch(Exception e){
+             Log.e(TAG,"Error trying to connect with Bluetooth");
+             return false;
+         }
+
+        }
+        //Verify the pi is the device
+       /* public Boolean verifyPi() throws UnsupportedEncodingException, InterruptedException {
+         String uuidtest = "94f39d29-7d6d-437d-973b-fba39e49d4ee";
+
+            while(true) {
+                if (mBluetoothConnection != null){
+                    if (mBluetoothConnection.read() != null) {
+                        mBluetoothConnection.write(uuidtest.getBytes("UTF-8"));
+                        if (mBluetoothConnection.read().equals("True")) {
+                            return true;
+                        } else if (mBluetoothConnection.read().equals("False")) {
+                            return false;
+                        } else {
+                            if (progressDialog == null) {
+                                progressDialog.setMessage("Verifying connection with Pi");
+                                progressDialog.show();
+                            }
+                        }
+                    }
+            }
+            }
+
+        }*/
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 // Don't forget to unregister the ACTION_FOUND receiver.
-if(receiver1!=null){
-    unregisterReceiver(receiver1);
-}
-        if(receiver!=null){
-            unregisterReceiver(receiver);
+        try {
+            if (receiver1 != null) {
+                unregisterReceiver(receiver1);
+            }
+            if (receiver != null) {
+                unregisterReceiver(receiver);
+            }
+        }catch(Exception e){
+            Log.e(TAG,"Receivers are already destroyed or do not exist in the first place");
         }
 
     }
 
 
-public class GPSRunnable implements Runnable{
 
+
+public static class GPSRunnable implements Runnable{
+//This thread is to be used specifically for follow Me method. Control me and map me threads can be added later
         BluetoothConnectionService mBluetoothConnection;
         Boolean followMode;
         GPSService GPS;
@@ -422,7 +446,7 @@ Log.d(TAG,"Runnable implemented");
                     Log.d(TAG, "Latitude: " + Double.toString(l.getLatitude()));
                     Log.d(TAG, "Longitude:  " + Double.toString(l.getLongitude()));
                     Log.d(TAG, "Accuracy: " + Double.toString(l.getAccuracy()));
-                    String GPSData = Double.toString(l.getLatitude())+","+ Double.toString(l.getLongitude())+","+Double.toString(l.getAccuracy())+"\n";
+                    String GPSData = "followMe,"+ Double.toString(l.getLatitude())+","+ Double.toString(l.getLongitude())+","+Double.toString(l.getAccuracy())+"\n";
                     byte[] bytes = new byte[0];
                     try {
                         bytes = GPSData.getBytes("UTF-8");
@@ -430,7 +454,8 @@ Log.d(TAG,"Runnable implemented");
                         e.printStackTrace();
                     }
                     mBluetoothConnection.write(bytes);
-                    MsgTerminal.append("Android Sent: "+write.getText().toString() +"\n");
+                    //This will be referenced with the next fragment class
+                    //MsgTerminal.append("Android Sent: "+write.getText().toString() +"\n");
                     try {
                         Thread.sleep(2000);
                     } catch (InterruptedException e) {
@@ -445,7 +470,59 @@ Log.d(TAG,"Runnable implemented");
 
     }
 }
+//getter and setter methods to return the private variables used in the fragments else it will not work
+    //returns the private TAG variable
+    public static String getTAG() {
+        return TAG;
+    }
+//Returns the 1st private receiver
+    public BroadcastReceiver getReceiver() {
+        return receiver;
+    }
+
+    public BroadcastReceiver getReceiver1() {
+        return receiver1;
+    }
+
+    public GPSService getGPS() {
+        return GPS;
+    }
 
 
+    public FollowMeFragment getFollowMeFragment() {
+        return followMeFragment;
+    }
 
-}
+    public MapFragment getMapFragment() {
+        return mapFragment;
+    }
+
+    public BluetoothScanFragment getBluetoothScanFragment() {
+        return bluetoothScanFragment;
+    }
+
+
+    public void setFollowMeFragment(FollowMeFragment followMeFragment) {
+        this.followMeFragment = followMeFragment;
+    }
+
+    public void setMapFragment(MapFragment mapFragment) {
+        this.mapFragment = mapFragment;
+    }
+
+    public void setBluetoothScanFragment(BluetoothScanFragment bluetoothScanFragment) {
+        this.bluetoothScanFragment = bluetoothScanFragment;
+    }
+
+    public ControlMeFragment getControlMeFragment() {
+        return controlMeFragment;
+    }
+
+    public void setControlMeFragment(ControlMeFragment controlMeFragment) {
+        this.controlMeFragment = controlMeFragment;
+    }
+
+    }
+
+
+//}

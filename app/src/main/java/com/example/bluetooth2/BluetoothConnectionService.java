@@ -38,21 +38,24 @@ public class BluetoothConnectionService {
     Context mContext;
     ListView lv;
     EditText write;
-    TextView MsgTerminal;
-    Button send;
+
+
+
+    //BluetoothSocket mSocket;
+
     private ConnectedThread mConnectedThread;
-    public BluetoothConnectionService(Context context, BluetoothAdapter mBluetoothAdapter, BluetoothDevice mmDevice, ListView lv, EditText write, TextView MsgTerminal, Button send) {
+    public BluetoothConnectionService(Context context, BluetoothAdapter mBluetoothAdapter, BluetoothDevice mmDevice, EditText write) {
         this.mContext = context;
 
         //These lines should do the same thing because they are getting the same device
         // mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.mBluetoothAdapter = mBluetoothAdapter;
         this.mmDevice = mmDevice;
-        this.lv = lv;
+
         this.write = write;
-        this.MsgTerminal = MsgTerminal;
-        this.send = send;
-        //this.lv =lv.findViewById(R.id.lv);
+
+
+
 
         //Should work
         //startClient(mmDevice,MY_INSECURE_UUID);
@@ -211,6 +214,10 @@ Log.i(TAG,"END mAcceptThhread");
 
         mConnectThread = new ConnectThread(device, uuid);
         mConnectThread.start();
+        //this.mSocket = mConnectedThread.mmSocket;
+
+        Log.d(TAG, "startClient: Client Start method complete.");
+
     }
 
     /**
@@ -223,13 +230,15 @@ Log.i(TAG,"END mAcceptThhread");
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
+        public String message;
 
-        //this.lv.setVisibility(View.GONE);
+
 
         public ConnectedThread(BluetoothSocket socket) {
             Log.d(TAG, "ConnectedThread: Starting.");
 
             mmSocket = socket;
+
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
 
@@ -263,6 +272,8 @@ Log.i(TAG,"END mAcceptThhread");
                 try {
                     bytes = mmInStream.read(buffer);
                     String incomingMessage = new String(buffer, 0, bytes);
+                    message = incomingMessage;
+
                     Log.d(TAG, "InputStream: " + incomingMessage);
                 } catch (IOException e) {
                     Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage() );
@@ -288,6 +299,14 @@ Log.i(TAG,"END mAcceptThhread");
                 mmSocket.close();
             } catch (IOException e) { }
         }
+
+
+    }
+    public InputStream getMmInStream() {
+        return mConnectedThread.mmInStream;
+    }
+    public String getMessage(){
+        return mConnectedThread.message;
     }
 
     private void connected(BluetoothSocket mmSocket, BluetoothDevice mmDevice) {
@@ -313,6 +332,8 @@ Log.i(TAG,"END mAcceptThhread");
         //perform the write
         mConnectedThread.write(out);
     }
+
+
 
 
 

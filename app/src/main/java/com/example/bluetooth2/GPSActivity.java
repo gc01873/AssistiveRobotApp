@@ -32,7 +32,7 @@ public class GPSActivity extends AppCompatActivity {
     Switch sw_locationupdates, sw_gps;
     Button btn_newWayPoint, btn_showWayPoint;
 
-    GPSService GPS = new GPSService(this);
+    GPSService GPS; 
 
     private static int DEFAULT_UPDATE_INTERVAL = 10;
     private static int FASTEST_UPDATE_INTERVAL = 5;
@@ -78,6 +78,7 @@ public class GPSActivity extends AppCompatActivity {
         btn_newWayPoint = findViewById(R.id.btn_newWayPoint);
         btn_showWayPoint = findViewById(R.id.btn_showWayPoint);
         tv_waypointCounts = findViewById(R.id.tv_countOfCrumbs);
+        GPS = new GPSService(this);
 
 
         //here we will declare and begin using actual location services

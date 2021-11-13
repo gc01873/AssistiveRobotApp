@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".BluetoothScanFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+
+    <Button
+        android:id="@+id/scan"
+        android:layout_width="119dp"
+        android:layout_height="71dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="66dp"
+        android:layout_marginEnd="57dp"
+        android:layout_marginBottom="22dp"
+        android:text="Scan"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/showDevices"
+        app:layout_constraintEnd_toStartOf="@+id/ONOFFbtn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <Switch
+        android:id="@+id/ONOFFbtn"
+        android:layout_width="100dp"
+        android:layout_height="67dp"
+        android:layout_marginStart="37dp"
+        android:layout_marginTop="61dp"
+        android:layout_marginEnd="70dp"
+        android:layout_marginBottom="68dp"
+        android:minHeight="48dp"
+        android:text="Bluetooth"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/showDevices"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/scan"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <EditText
+        android:id="@+id/showDevices"
+        android:layout_width="242dp"
+        android:layout_height="59dp"
+        android:layout_marginStart="67dp"
+        android:layout_marginEnd="66dp"
+        android:layout_marginBottom="25dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Scanned Devices"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/lv"
+        app:layout_constraintEnd_toEndOf="@+id/lv"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scan"
+        tools:visibility="visible" />
+
+    <ListView
+        android:id="@+id/lv"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+
+        android:layout_marginStart="36dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginBottom="76dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/showDevices"
+        tools:visibility="visible">
+
+
+    </ListView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
