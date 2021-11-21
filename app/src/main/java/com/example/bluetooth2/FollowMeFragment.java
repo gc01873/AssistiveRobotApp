@@ -97,6 +97,7 @@ FragmentManager fm;
          //This will manage the various fragments
          fm = mBActivity.getSupportFragmentManager();
         Thread GPS_t = new Thread(new BluetoothConnectActivity.GPSRunnable(mBActivity.mBluetoothConnection, mBActivity.followMode, mBActivity.getGPS()));
+        //writeControl("followMe", "none");
 
 //Send button will send data to the pi
         Start.setOnClickListener(new View.OnClickListener() {
@@ -124,7 +125,7 @@ FragmentManager fm;
                             Start.setText("Stop");
                         } else if(Start.getText().equals("Stop")) {
 
-                            GPS_t.stop();
+                            GPS_t.interrupt();
                             String GPSData = "inactive,"+ Double.toString(mBActivity.getGPS().getLastLocation().getLatitude())+","+ Double.toString(mBActivity.getGPS().getLastLocation().getLongitude())+","+Double.toString(mBActivity.getGPS().getLastLocation().getAccuracy())+"\n";
                             byte[] bytes = GPSData.getBytes("UTF-8");
                             mBActivity.mBluetoothConnection.write(bytes);
@@ -144,16 +145,25 @@ FragmentManager fm;
             @Override
             public void onClick(View view) {
                 //This will make the followMe button greyed out and it will also indicate that we are in the followMe Fragment
-                followMe.setAlpha(.5f);
-                followMe.setClickable(false);
+                //followMe.setAlpha(.5f);
+                //followMe.setClickable(false);
 
                 if(!mBActivity.followMode) {
                     mBActivity.followMode = true;
+                    Log.d(mBActivity.getTAG()," mBActivity.followmode is called" );
+
                     //GPS Runnable was mad static. This should not be an issue NOW because it is only ran when follow me is pushed!
                     Thread GPS_t = new Thread(new BluetoothConnectActivity.GPSRunnable(mBActivity.mBluetoothConnection, mBActivity.followMode, mBActivity.getGPS()));
+                    Log.d(mBActivity.getTAG()," Thread_GPS is instantiated" );
+
                     GPS_t.start();
+                    Log.d(mBActivity.getTAG()," Thread_GPS is started" );
                 }
-                else {
+                else {if(mBActivity.followMode){
+                    mBActivity.followMode = false;
+                    GPS_t.interrupt();
+
+                }
                     mBActivity.followMode = !mBActivity.followMode;
                     //GPS_t.stop();
                     //String GPSData = "inactive,"+ Double.toString(mBActivity.getGPS().getLastLocation().getLatitude())+","+ Double.toString(mBActivity.getGPS().getLastLocation().getLongitude())+","+Double.toString(mBActivity.getGPS().getLastLocation().getAccuracy())+"\n";
@@ -187,8 +197,14 @@ FragmentManager fm;
         );
 
         ControlMe.setOnClickListener(new View.OnClickListener() {
+
                                          @Override
                                          public void onClick(View view) {
+                                             if(mBActivity.getFollowMode()==true){
+                                                 mBActivity.followMode =false;
+
+
+                                             }
                                              if (mBActivity.getControlMeFragment() == null) {
                                                  mBActivity.setControlMeFragment(new ControlMeFragment());
                                                  Log.d(mBActivity.getTAG(),"A New ControlMe Fragment has been created");
@@ -255,6 +271,27 @@ FragmentManager fm;
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
+    }
+
+    public void writeControl(String mode,String action){
+        String GPSData = null;
+        /*if (mBActivity.getGPS().getLastLocation() == null) {
+            GPSData = mode+"," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + action + "\n";
+        } else {
+            GPSData = mode+"," + Double.toString(mBActivity.getGPS().getLastLocation().getLatitude()) + "," + Double.toString(mBActivity.getGPS().getLastLocation().getLongitude()) + "," + Double.toString(mBActivity.getGPS().getLastLocation().getAccuracy()) + "," + action + "\n";
+        }
+
+         */
+        GPSData = mode+"," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + action + "\n";
+        byte[] bytes = new byte[0];
+        try {
+            bytes = GPSData.getBytes("UTF-8");
+            mBActivity.mBluetoothConnection.write(bytes);
+            Log.d(mBActivity.getTAG(), "Message written to Pi: " + GPSData);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
     }
 }

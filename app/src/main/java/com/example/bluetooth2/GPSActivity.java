@@ -31,6 +31,8 @@ public class GPSActivity extends AppCompatActivity {
     TextView tv_lat, tv_lon, tv_altitude, tv_accuracy, tv_speed, tv_sensor, tv_address, tv_updates,tv_waypointCounts;
     Switch sw_locationupdates, sw_gps;
     Button btn_newWayPoint, btn_showWayPoint;
+    //Mode to determine what state we should be in
+
 
     GPSService GPS; 
 

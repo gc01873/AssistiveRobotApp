@@ -9,30 +9,36 @@
 
 
     <Button
-        android:id="@+id/send"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="56dp"
-        android:layout_marginBottom="80dp"
-        android:text="Send"
+        android:id="@+id/demo2"
+        android:layout_width="157dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="429dp"
+        android:text="Demo 2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/write"
-        app:layout_constraintTop_toBottomOf="@+id/mapView"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Map" />
+
+    <Button
+        android:id="@+id/demo1"
+        android:layout_width="157dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="43dp"
+        android:text="Demo 1"
+        app:layout_constraintBottom_toTopOf="@+id/demo2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ControlMe" />
 
     <Button
         android:id="@+id/FollowMe"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="57dp"
+        android:layout_marginEnd="3dp"
         android:text="Follow"
-        app:layout_constraintBottom_toTopOf="@+id/mapView"
+        app:layout_constraintBaseline_toBaselineOf="@+id/Map"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/Map"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/Map" />
 
     <Button
         android:id="@+id/ControlMe"
@@ -40,10 +46,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:layout_marginTop="36dp"
-        android:layout_marginEnd="2dp"
-        android:layout_marginBottom="519dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="87dp"
         android:text="Control"
-        app:layout_constraintBottom_toTopOf="@+id/write"
+        app:layout_constraintBottom_toTopOf="@+id/demo1"
         app:layout_constraintEnd_toStartOf="@+id/Map"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -54,12 +60,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
-        android:layout_marginBottom="57dp"
-        android:text="Map View"
-        app:layout_constraintBottom_toTopOf="@+id/mapView"
+        android:layout_marginBottom="174dp"
+        android:text="Demo"
+        app:layout_constraintBottom_toTopOf="@+id/demo2"
         app:layout_constraintEnd_toStartOf="@+id/FollowMe"
         app:layout_constraintStart_toEndOf="@+id/ControlMe"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/demo3"
+        android:layout_width="158dp"
+        android:layout_height="43dp"
+        android:layout_marginBottom="344dp"
+        android:text="Demo 3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/demo2"
+        app:layout_constraintVertical_bias="1.0" />
 
     <!--<androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_standard"
@@ -85,32 +104,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="gone" /> -->
-
-    <EditText
-        android:id="@+id/write"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="48dp"
-        android:layout_marginEnd="25dp"
-        android:layout_marginBottom="77dp"
-        android:ems="10"
-        android:text="Write"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/send"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ControlMe" />
-
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/mapView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="28dp"
-        android:layout_marginEnd="28dp"
-        android:layout_marginBottom="175dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Map" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

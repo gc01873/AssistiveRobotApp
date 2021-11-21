@@ -8,74 +8,64 @@
     tools:context=".MapFragment">
 
 
-    <Button
+ <!-- <Button
         android:id="@+id/send"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="56dp"
-        android:layout_marginBottom="138dp"
         android:text="Send"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/write"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_standard"
-        app:layout_constraintVertical_bias="0.965" />
+        tools:layout_editor_absoluteX="267dp"
+        tools:layout_editor_absoluteY="462dp" />-->
 
-    <Button
-        android:id="@+id/FollowMe"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="68dp"
-        android:text="Follow"
-        app:layout_constraintBottom_toTopOf="@+id/fragment_standard"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/Map"
-        app:layout_constraintTop_toTopOf="parent" />
+ <Button
+     android:id="@+id/FollowMe"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_marginTop="36dp"
+     android:layout_marginEnd="8dp"
+     android:layout_marginBottom="174dp"
+     android:text="Follow"
+     app:layout_constraintBottom_toTopOf="@+id/right_arrow"
+     app:layout_constraintEnd_toEndOf="parent"
+     app:layout_constraintStart_toEndOf="@+id/Map"
+     app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/ControlMe"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="36dp"
-        android:layout_marginEnd="2dp"
-        android:layout_marginBottom="458dp"
-        android:text="Control"
-        app:layout_constraintBottom_toTopOf="@+id/write"
-        app:layout_constraintEnd_toStartOf="@+id/Map"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+ <Button
+     android:id="@+id/ControlMe"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_marginStart="7dp"
+     android:layout_marginTop="36dp"
+     android:layout_marginEnd="4dp"
+     android:layout_marginBottom="174dp"
+     android:text="Control"
+     app:layout_constraintBottom_toTopOf="@+id/left_arrow"
+     app:layout_constraintEnd_toStartOf="@+id/Map"
+     app:layout_constraintStart_toStartOf="parent"
+     app:layout_constraintTop_toTopOf="parent" />
 
 
-    <Button
-        android:id="@+id/Map"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
-        android:layout_marginBottom="68dp"
-        android:text="Map View"
-        app:layout_constraintBottom_toTopOf="@+id/fragment_standard"
-        app:layout_constraintEnd_toStartOf="@+id/FollowMe"
-        app:layout_constraintStart_toEndOf="@+id/ControlMe"
-        app:layout_constraintTop_toTopOf="parent" />
+ <Button
+     android:id="@+id/Map"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_marginTop="36dp"
+     android:layout_marginBottom="113dp"
+     android:text="Demo"
+     app:layout_constraintBottom_toTopOf="@+id/up_arrow"
+     app:layout_constraintEnd_toStartOf="@+id/FollowMe"
+     app:layout_constraintStart_toEndOf="@+id/ControlMe"
+     app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
+ <!-- <EditText
         android:id="@+id/write"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="48dp"
-        android:layout_marginEnd="26dp"
-        android:layout_marginBottom="138dp"
+        android:layout_width="194dp"
+        android:layout_height="53dp"
         android:ems="10"
         android:text="Write"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/send"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ControlMe" />
+        tools:layout_editor_absoluteX="48dp"
+        tools:layout_editor_absoluteY="542dp" /> -->
 
-    <androidx.fragment.app.FragmentContainerView
+ <!--<androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_standard"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -86,19 +76,81 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Map" />
+        app:layout_constraintTop_toBottomOf="@+id/Map" /> -->
 
-    <TextView
-        android:id="@+id/MessageLog"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:text=""
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone" />
+ <TextView
+     android:id="@+id/MessageLog"
+     android:layout_width="0dp"
+     android:layout_height="0dp"
+     android:text=""
+     android:visibility="gone"
+     app:layout_constraintBottom_toTopOf="parent"
+     app:layout_constraintEnd_toStartOf="parent"
+     app:layout_constraintStart_toStartOf="parent"
+     app:layout_constraintTop_toTopOf="parent"
+     tools:visibility="gone" />
+
+
+ <Button
+     android:id="@+id/up_arrow"
+     android:layout_width="114dp"
+     android:layout_height="0dp"
+     android:layout_marginStart="126dp"
+     android:layout_marginEnd="123dp"
+     android:layout_marginBottom="13dp"
+     android:background="@drawable/ic_baseline_arrow_upward_24"
+     app:layout_constraintBottom_toTopOf="@+id/down_arrow"
+     app:layout_constraintEnd_toEndOf="@+id/right_arrow"
+     app:layout_constraintStart_toStartOf="@+id/left_arrow"
+     app:layout_constraintTop_toBottomOf="@+id/Map" />
+
+ <Button
+     android:id="@+id/down_arrow"
+     android:layout_width="0dp"
+     android:layout_height="0dp"
+     android:layout_marginEnd="7dp"
+     android:layout_marginBottom="128dp"
+     android:background="@drawable/ic_baseline_arrow_downward_24"
+     app:layout_constraintBottom_toTopOf="@+id/stop"
+     app:layout_constraintEnd_toStartOf="@+id/right_arrow"
+     app:layout_constraintStart_toEndOf="@+id/left_arrow"
+     app:layout_constraintTop_toBottomOf="@+id/up_arrow" />
+
+ <Button
+     android:id="@+id/left_arrow"
+     android:layout_width="0dp"
+     android:layout_height="0dp"
+     android:layout_marginStart="18dp"
+     android:layout_marginEnd="14dp"
+     android:layout_marginBottom="361dp"
+     android:background="@drawable/ic_baseline_arrow_left_24"
+     app:layout_constraintBottom_toBottomOf="parent"
+     app:layout_constraintEnd_toStartOf="@+id/down_arrow"
+     app:layout_constraintStart_toStartOf="parent"
+     app:layout_constraintTop_toBottomOf="@+id/ControlMe" />
+
+ <Button
+     android:id="@+id/right_arrow"
+     android:layout_width="0dp"
+     android:layout_height="0dp"
+     android:layout_marginEnd="30dp"
+     android:layout_marginBottom="361dp"
+     android:background="@drawable/ic_baseline_arrow_right_24"
+     app:layout_constraintBottom_toBottomOf="parent"
+     app:layout_constraintEnd_toEndOf="parent"
+     app:layout_constraintStart_toEndOf="@+id/down_arrow"
+     app:layout_constraintTop_toBottomOf="@+id/FollowMe" />
+
+ <Button
+     android:id="@+id/stop"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_marginBottom="121dp"
+     android:text="Stop"
+     app:layout_constraintBottom_toBottomOf="parent"
+     app:layout_constraintEnd_toEndOf="parent"
+     app:layout_constraintStart_toStartOf="parent"
+     app:layout_constraintTop_toBottomOf="@+id/down_arrow" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

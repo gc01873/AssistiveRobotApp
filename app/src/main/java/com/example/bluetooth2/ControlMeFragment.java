@@ -5,8 +5,10 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -36,12 +38,22 @@ public class ControlMeFragment extends Fragment {
     private BluetoothConnectActivity mBActivity;
 
     //Buttons being added to followMe fragment
-    Button send;
+    //Button send;
     Button followMe;
     Button ControlMe;
     Button MapMe;
-    EditText write;
+    Button stop;
+    //EditText write;
     TextView MessageLog;
+    Button up;
+    Button down;
+    Button left;
+    Button right;
+    private Boolean upPressed=false;
+    private Boolean downPressed= false;
+    private Boolean leftPressed = false;
+    private Boolean rightPressed = false;
+
 
 
 
@@ -86,21 +98,32 @@ public class ControlMeFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_control_me, container, false);
         mBActivity = (BluetoothConnectActivity) getActivity();
-        send = (Button) view.findViewById(R.id.send);
+        //send = (Button) view.findViewById(R.id.send);
         followMe = (Button) view.findViewById(R.id.FollowMe);
         ControlMe = (Button) view.findViewById(R.id.ControlMe);
         MapMe = (Button) view.findViewById(R.id.Map) ;
-        write = (EditText) view.findViewById(R.id.write);
+        //write = (EditText) view.findViewById(R.id.write);
         MessageLog = (TextView)view.findViewById(R.id.MessageLog);
+        stop = (Button) view.findViewById(R.id.stop);
+        up  = (Button)view.findViewById(R.id.up_arrow);
+        down = (Button)view.findViewById(R.id.down_arrow);
+        left = (Button)view.findViewById(R.id.left_arrow);
+        right = (Button)view.findViewById(R.id.right_arrow);
+        GPS_t = new Thread(new BluetoothConnectActivity.GPSUpdateRunnable(mBActivity.mBluetoothConnection, mBActivity.getGPS()));
+        GPS_t.start();
+
+
 //This will manage the various fragments
         fm = mBActivity.getSupportFragmentManager();
 
         ControlMe.setAlpha(.5f);
         ControlMe.setClickable(false);
 
+        writeControl("controlMe", "none");
+        //writeControl("controlMe", "stop");
 
 
-        //Send button will send data to the pi
+       /* //Send button will send data to the pi
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -121,11 +144,12 @@ public class ControlMeFragment extends Fragment {
                     }
                 }
             }
-        });
+        });*/
 
         followMe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                GPS_t.interrupt();
                 if (mBActivity.getFollowMeFragment() == null) {
                     mBActivity.setFollowMeFragment(new FollowMeFragment());
                     Log.d(mBActivity.getTAG(),"A New FollowME Fragment has been created");
@@ -134,6 +158,7 @@ public class ControlMeFragment extends Fragment {
                             .commit();
                 }
                 else {
+                    GPS_t.stop();
                     Log.d(mBActivity.getTAG()," FollowMe Fragment of the Bluetooth Activity has been created");
                     fm.beginTransaction().replace(R.id.fragment_container_view,mBActivity.getFollowMeFragment())
                             .addToBackStack(null)
@@ -148,6 +173,7 @@ public class ControlMeFragment extends Fragment {
         MapMe.setOnClickListener(new View.OnClickListener() {
                                      @Override
                                      public void onClick(View view) {
+                                         GPS_t.stop();
                                          if (mBActivity.getMapFragment() == null) {
                                              mBActivity.setMapFragment(new MapFragment());
                                              Log.d(mBActivity.getTAG(),"A New Map Fragment has been created");
@@ -156,6 +182,7 @@ public class ControlMeFragment extends Fragment {
                                                      .commit();
                                          }
                                          else{
+                                             GPS_t.stop();
                                              Log.d(mBActivity.getTAG()," Map Fragment of the Bluetooth Activity has been created");
                                              fm.beginTransaction().replace(R.id.fragment_container_view,mBActivity.getMapFragment())
                                                      .addToBackStack(null)
@@ -164,9 +191,241 @@ public class ControlMeFragment extends Fragment {
                                      }
                                  }
 
+
         );
+
+        stop.setOnClickListener(new View.OnClickListener() {
+                                     @Override
+                                     public void onClick(View view) {
+                                         writeControl("controlMe", "stop");
+
+                                     }
+                                 }
+
+
+        );
+
+
+
+
+
+        up.setOnTouchListener(new View.OnTouchListener() {
+            private Handler mHandler;
+
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+
+                switch(event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        if (mHandler != null) return true;
+                        mHandler = new Handler();
+                        mHandler.postDelayed(mAction, 500);
+                        up.setAlpha(.5f);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        if (mHandler == null) return true;
+                        mHandler.removeCallbacks(mAction);
+                        upPressed =false;
+                        writeControl("controlMe", "stop1");
+                        mHandler = null;
+                        up.setAlpha(1f);
+                        Log.d(mBActivity.getTAG(), "up Button lifted");
+                        break;
+                }
+                return false;
+            }
+            Runnable mAction = new Runnable() {
+                @Override public void run() {
+                    if(upPressed==false) {
+                        upPressed=true;
+                        writeControl("controlMe", "up");
+                    }
+                    mHandler.postDelayed(this, 500);
+                }
+
+            };
+
+        });
+        down.setOnTouchListener(new View.OnTouchListener() {
+            private Handler mHandler;
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        if (mHandler != null) return true;
+                        mHandler = new Handler();
+                        mHandler.postDelayed(mAction, 500);
+                        down.setAlpha(.5f);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        if (mHandler == null) return true;
+                        mHandler.removeCallbacks(mAction);
+                        downPressed=false;
+                        writeControl("controlMe", "stop");
+                        mHandler = null;
+                        Log.d(mBActivity.getTAG(), "down Button lifted");
+                        down.setAlpha(1f);
+                        break;
+                }
+                return false;
+            }
+            Runnable mAction = new Runnable() {
+                @Override public void run() {
+                    if (downPressed == false) {
+                        downPressed = true;
+
+                        writeControl("controlMe", "down");
+                    }
+                    mHandler.postDelayed(this, 500);
+                }
+            };
+        });
+
+        left.setOnTouchListener(new View.OnTouchListener() {
+            private Handler mHandler;
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        if (mHandler != null) return true;
+                        mHandler = new Handler();
+                        mHandler.postDelayed(mAction, 500);
+                        left.setAlpha(0.5f);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        if (mHandler == null) return true;
+                        mHandler.removeCallbacks(mAction);
+                        //mHandler.postDelayed(mActionStop,500);
+                        //mHandler.removeCallbacks(mActionStop);
+                        leftPressed=false;
+
+                        writeControl("controlMe","stop");
+                        mHandler = null;
+                        left.setAlpha(1f);
+
+                        Log.d(mBActivity.getTAG(), "left Button lifted");
+                        break;
+                }
+                return false;
+            }
+            Runnable mAction = new Runnable() {
+                @Override
+                public void run() {
+                    if (leftPressed == false) {
+                        leftPressed = true;
+
+                        writeControl("controlMe","left");
+                    }
+
+                    mHandler.postDelayed(this, 500);
+                }
+
+
+            };
+
+        });
+
+
+
+        right.setOnTouchListener(new View.OnTouchListener() {
+            private Handler mHandler;
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        if (mHandler != null) return true;
+                        mHandler = new Handler();
+                        mHandler.postDelayed(mAction, 500);
+                        right.setAlpha(0.5f);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        if (mHandler == null) return true;
+                        mHandler.removeCallbacks(mAction);
+                        //mHandler.postDelayed(mActionStop,500);
+                        //mHandler.removeCallbacks(mActionStop);
+                        mHandler = null;
+                        rightPressed=false;
+                        String GPSData = null;
+                        writeControl("controlMe","stop");
+                        right.setAlpha(1f);
+
+                        Log.d(mBActivity.getTAG(), "right Button lifted");
+
+
+                        break;
+                }
+                return false;
+            }
+            Runnable mAction = new Runnable() {
+                @Override public void run() {
+                    if(rightPressed==false) {
+                        rightPressed = true;
+                    writeControl("controlMe","right");
+                        }
+                    mHandler.postDelayed(this, 500);
+
+                }
+            };
+        });
         return view;
 
 
+    }
+
+
+    public void writeControl(String mode,String action){
+        String GPSData = null;
+        /*if (mBActivity.getGPS().getLastLocation() == null) {
+            GPSData = mode+"," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + action + "\n";
+        } else {
+            GPSData = mode+"," + Double.toString(mBActivity.getGPS().getLastLocation().getLatitude()) + "," + Double.toString(mBActivity.getGPS().getLastLocation().getLongitude()) + "," + Double.toString(mBActivity.getGPS().getLastLocation().getAccuracy()) + "," + action + "\n";
+        }
+
+         */
+        GPSData = mode+"," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + action + "\n";
+        byte[] bytes = new byte[0];
+        try {
+            bytes = GPSData.getBytes("UTF-8");
+            mBActivity.mBluetoothConnection.write(bytes);
+            Log.d(mBActivity.getTAG(), "Message written to Pi: " + GPSData);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    public Boolean getUpPressed() {
+        return upPressed;
+    }
+
+    public void setUpPressed(Boolean upPressed) {
+        this.upPressed = upPressed;
+    }
+
+    public Boolean getDownPressed() {
+        return downPressed;
+    }
+
+    public void setDownPressed(Boolean downPressed) {
+        downPressed = downPressed;
+    }
+
+    public Boolean getLeftPressed() {
+        return leftPressed;
+    }
+
+    public void setLeftPressed(Boolean leftPressed) {
+        this.leftPressed = leftPressed;
+    }
+
+    public Boolean getRightPressed() {
+        return rightPressed;
+    }
+
+    public void setRightPressed(Boolean rightPressed) {
+        this.rightPressed = rightPressed;
     }
 }

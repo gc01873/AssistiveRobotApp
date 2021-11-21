@@ -58,12 +58,16 @@ public ArrayList<String> mBTDevicesNames = new ArrayList<>();
 private ArrayAdapter<String> listAdapter;
 Boolean Connected=false;
 private GPSService GPS;
+
+
+
 public Boolean followMode = false;
 //this device will become the raspberry pi
 BluetoothDevice mBTDevice;
 //ID is the same as the PI
 private static final UUID MY_UUID_INSECURE = UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee");
 ProgressDialog dialog;
+public String mode = "inactive";
 
 //For logging errors
 private static final String TAG = "BluetoothActivity";
@@ -350,7 +354,7 @@ GPS_t.start();
 
              int bytes;
              String uuidtest = "94f39d29-7d6d-437d-973b-fba39e49d4ee";
-             Thread.sleep(2000);
+             Thread.sleep(3000);
              String pimsg = mBluetoothConnection.getMessage();
              Log.d(TAG,"Received uuid string from Pi");
              Log.d(TAG,pimsg);
@@ -424,6 +428,7 @@ public static class GPSRunnable implements Runnable{
         BluetoothConnectionService mBluetoothConnection;
         Boolean followMode;
         GPSService GPS;
+        String mode;
         public GPSRunnable(BluetoothConnectionService mBluetoothConnection,Boolean followMode,GPSService GPS){
             this.followMode = followMode;
             this.mBluetoothConnection = mBluetoothConnection;
@@ -470,6 +475,39 @@ Log.d(TAG,"Runnable implemented");
 
     }
 }
+
+
+
+    public static class GPSUpdateRunnable implements Runnable{
+        //This thread is to be used specifically for follow Me method. Control me and map me threads can be added later
+        BluetoothConnectionService mBluetoothConnection;
+
+        GPSService GPS;
+        public GPSUpdateRunnable(BluetoothConnectionService mBluetoothConnection,GPSService GPS){
+
+            this.mBluetoothConnection = mBluetoothConnection;
+            this.GPS = GPS;
+        }
+
+        @Override
+        public void run() {
+            Log.d(TAG,"Runnable implemented");
+            if(mBluetoothConnection!=null) {
+                //LocationRequest.PRIORITY_HIGH_ACCURACY
+                GPS.setLocationRequests(2000,1000, LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+                GPS.startLocationUpdates();
+                while(true){
+                    Location l = GPS.getLastLocation();
+
+                }
+
+                }
+
+            }
+
+
+    }
 //getter and setter methods to return the private variables used in the fragments else it will not work
     //returns the private TAG variable
     public static String getTAG() {
@@ -520,6 +558,14 @@ Log.d(TAG,"Runnable implemented");
 
     public void setControlMeFragment(ControlMeFragment controlMeFragment) {
         this.controlMeFragment = controlMeFragment;
+    }
+
+    public Boolean getFollowMode() {
+        return followMode;
+    }
+
+    public void setFollowMode(Boolean followMode) {
+        this.followMode = followMode;
     }
 
     }

@@ -4,13 +4,20 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../layout/custom_preview.xml" value="0.18333333333333332" />
+        <entry key="app/src/main/res/drawable/ic_baseline_arrow_down_clicked_24.xml" value="0.20364583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_arrow_downward_24.xml" value="0.20364583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_arrow_forward_24.xml" value="0.20364583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_arrow_left_24.xml" value="0.20364583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_arrow_right_clicked_24.xml" value="0.20364583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_arrow_upward_24.xml" value="0.20364583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_arrow_upward_clicked_24.xml" value="0.20364583333333333" />
         <entry key="app/src/main/res/layout/activity_connectblu.xml" value="0.19943992204210687" />
         <entry key="app/src/main/res/layout/activity_gps.xml" value="0.246548606510041" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.15364583333333334" />
         <entry key="app/src/main/res/layout/fragment_bluetooth_scan.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/fragment_control_me.xml" value="0.23097826086956522" />
+        <entry key="app/src/main/res/layout/fragment_control_me.xml" value="0.1717125851149391" />
         <entry key="app/src/main/res/layout/fragment_follow_me.xml" value="0.25" />
-        <entry key="app/src/main/res/layout/fragment_map.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_map.xml" value="0.25" />
       </map>
     </option>
   </component>

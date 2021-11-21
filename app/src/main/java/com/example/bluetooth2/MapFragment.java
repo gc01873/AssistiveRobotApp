@@ -9,7 +9,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import android.service.controls.Control;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,7 +38,7 @@ import java.io.UnsupportedEncodingException;
 /* This fragment will display a map view which will have the user's location, the location of the raspberry pi
 and the option to add a point to the bot for it to go to that destination
  */
-public class MapFragment extends Fragment implements OnMapReadyCallback {
+public class MapFragment extends Fragment  {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -57,15 +56,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     Button send;
     Button followMe;
     Button ControlMe;
-    Button MapMe;
+    Button demo;
+    Button demo1;
+    Button demo2;
+    Button demo3;
+    Boolean demo1Clicked = false;
+    Boolean demo2Clicked = false;
+    Boolean demo3Clicked = false;
+
+
+
     EditText write;
     TextView MessageLog;
 
     Thread GPS_t;
 
     FragmentManager fm;
-    MapView mMapView;
-    private GoogleMap googleMap;
+
+
 
     GPSService mapGps;
 
@@ -107,18 +115,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         mBActivity = (BluetoothConnectActivity) getActivity();
-        send = (Button) view.findViewById(R.id.send);
         followMe = (Button) view.findViewById(R.id.FollowMe);
         ControlMe = (Button) view.findViewById(R.id.ControlMe);
-        MapMe = (Button) view.findViewById(R.id.Map);
-        write = (EditText) view.findViewById(R.id.write);
-        // MessageLog = (TextView)view.findViewById(R.id.MessageLog);
+        demo = (Button) view.findViewById(R.id.Map);
+        demo1 = (Button) view.findViewById(R.id.demo1);
+        demo2 = (Button) view.findViewById(R.id.demo2);
+        demo3 = (Button) view.findViewById(R.id.demo3);
+
+
 //This will manage the various fragments
         fm = mBActivity.getSupportFragmentManager();
 
 //This will make the map button unclickable
-        MapMe.setAlpha(.5f);
-        MapMe.setClickable(false);
+        demo.setAlpha(.5f);
+        demo.setClickable(false);
         //This should give us the gps from the activity
         if(mBActivity.getGPS()!=null){
             mapGps = mBActivity.getGPS();
@@ -128,30 +138,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             Log.e(mBActivity.getTAG(),"GPS Service seems to be null!");
         }
         Location currentL = mapGps.getLastLocation();
+        String demoData;
+        demoData = "demoMe," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + "demo" + "\n";
+        byte[] bytes = new byte[0];
+        try {
+            bytes = demoData.getBytes("UTF-8");
+            mBActivity.mBluetoothConnection.write(bytes);
+            Log.d(mBActivity.getTAG(), "Message written to Pi: " + demoData);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
 
-        //Send button will send data to the pi
-        send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mBActivity.mBluetoothConnection != null) {
-                    if (write.getText().toString() != null) {
-                        // String SendData = w;
-                        try {
-                            byte[] bytes = write.getText().toString().getBytes("UTF-8");
-                            mBActivity.mBluetoothConnection.write(bytes);
-                            MessageLog.append("Android: " + write.getText().toString() + "\n");
-                        } catch (UnsupportedEncodingException e) {
-                            Log.e(mBActivity.getTAG(), "Write method error: " + e.getMessage());
-                            e.printStackTrace();
-                        }
-                        //convert editText to byte code
-                        //use Bluetoothconnection to write i.e send to raspberry pi
-                        //print text to msg terminal
-                    }
-                }
-            }
-        });
+
+
+
+
 
         followMe.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -174,7 +176,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         });
         //Map me will call t
-        MapMe.setOnClickListener(new View.OnClickListener() {
+        demo.setOnClickListener(new View.OnClickListener() {
                                      @Override
                                      public void onClick(View view) {
                                          if (mBActivity.getMapFragment() == null) {
@@ -214,53 +216,112 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         );
 
+        demo1.setOnClickListener(new View.OnClickListener() {
+                                         @Override
+                                         public void onClick(View view) {
+                                             demo1.setAlpha(.5f);
+                                             demo1.setClickable(false);
+                                             String demoData;
+                                             demoData = "demoMe," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + "demo1" + "\n";
+                                             byte[] bytes = new byte[0];
+                                             try {
+                                                 bytes = demoData.getBytes("UTF-8");
+                                                 mBActivity.mBluetoothConnection.write(bytes);
+                                                 Log.d(mBActivity.getTAG(), "Message written to Pi: " + demoData);
+                                             } catch (UnsupportedEncodingException e) {
+                                                 e.printStackTrace();
+                                             }
+                                             while(true){
+                                                 String pimsg = mBActivity.mBluetoothConnection.getMessage();
+                                                 if(pimsg.equals("done!")){
+                                                     demo1.setAlpha(1f);
+                                                     demo1.setClickable(true);
+                                                     break;
+                                                 }
+                                             }
 
-        mMapView = (MapView) view.findViewById(R.id.mapView);
-        mMapView.onCreate(savedInstanceState);
 
-        mMapView.onResume(); // needed to get the map to display immediately
 
-        try {
-            MapsInitializer.initialize(getActivity().getApplicationContext());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        mMapView.getMapAsync(new OnMapReadyCallback() {
+                                             }
+                                         }
+
+
+
+        );
+
+
+        demo2.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onMapReady(GoogleMap mMap) {
-                googleMap = mMap;
-
-                // For showing a move to my location button
-                if (ActivityCompat.checkSelfPermission(mBActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mBActivity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
+            public void onClick(View view) {
+                demo2.setAlpha(.5f);
+                demo2.setClickable(false);
+                String demoData;
+                demoData = "demoMe," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + "demo2" + "\n";
+                byte[] bytes = new byte[0];
+                try {
+                    bytes = demoData.getBytes("UTF-8");
+                    mBActivity.mBluetoothConnection.write(bytes);
+                    Log.d(mBActivity.getTAG(), "Message written to Pi: " + demoData);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
                 }
-                googleMap.setMyLocationEnabled(true);
+                while(true){
+                    String pimsg = mBActivity.mBluetoothConnection.getMessage();
+                    if(pimsg.equals("done2")){
+                        demo2.setAlpha(1f);
+                        demo2.setClickable(true);
+                        break;
+                    }
 
-                // For dropping a marker at a point on the Map
-                LatLng myLocation = new LatLng(currentL.getLatitude(), currentL.getLongitude());
-                googleMap.addMarker(new MarkerOptions().position(myLocation).title("My location").snippet("Marker Description"));
+                }
 
-                // For zooming automatically to the location of the marker
-                CameraPosition cameraPosition = new CameraPosition.Builder().target(myLocation).zoom(12).build();
-                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+
+
             }
         });
+
+
+        demo3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                demo3.setAlpha(.5f);
+                demo3.setClickable(false);
+                String demoData;
+                demoData = "demoMe," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + Double.toString(0.0) + "," + "demo3" + "\n";
+                byte[] bytes = new byte[0];
+                try {
+                    bytes = demoData.getBytes("UTF-8");
+                    mBActivity.mBluetoothConnection.write(bytes);
+                    Log.d(mBActivity.getTAG(), "Message written to Pi: " + demoData);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                while(true){
+                    String pimsg = mBActivity.mBluetoothConnection.getMessage();
+                    if(pimsg.equals("done3")){
+                        demo3.setAlpha(1f);
+                        demo3.setClickable(true);
+                        break;
+                    }
+
+                }
+
+
+
+
+            }
+        });
+
+
+
+
 
         return view;
     }
 
     //This fragment should display the maps and should send raspberry ti to the destination
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
 
-    }
 }
